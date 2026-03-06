@@ -23,13 +23,14 @@ build db=VARIANT:
   echo "docker build -f {{db}}/Dockerfile -t ${PREFIX}${IMAGE} ."
   docker build -f {{db}}/Dockerfile -t ${PREFIX}${IMAGE} .
 
-# Build and push image to registry - no echo for security
+# Build and push image to registry
 publish db=VARIANT:
   #!/usr/bin/env bash
   PREFIX=${REGISTRY_URL:+${REGISTRY_URL}/}
   IMAGE="{{db}}:{{VERSION}}"
 
   just build {{db}}
+  echo "docker push ${PREFIX}${IMAGE}"
   docker push ${PREFIX}${IMAGE}
 
 ### Tests ###
