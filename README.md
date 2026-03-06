@@ -1,4 +1,4 @@
-# resources-databases
+# databases
 
 Custom database Docker images, built for local development and self-hosted deployments.
 
