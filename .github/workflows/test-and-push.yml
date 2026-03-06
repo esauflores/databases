@@ -1,0 +1,54 @@
+name: Database Test
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        db: [postgres]
+
+    env:
+      ### Postgres ###
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PORT: 5432
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jdx/mise-action@v3
+
+      - name: Test ${{ matrix.db }}
+        run: just test ${{ matrix.db }}
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        db: [postgres]
+
+    env:
+      REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+      VERSION: ${{ github.ref_name }}
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jdx/mise-action@v3
+
+      - name: Login to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Publish ${{ matrix.db }}
+        run: just publish ${{ matrix.db }}
