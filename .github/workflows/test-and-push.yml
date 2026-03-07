@@ -2,14 +2,17 @@ name: Database Test
 
 on:
   push:
-    tags:
-      - "v*"
+    tags: ["v*"]
+  pull_request:
+  push:
+    branches: [main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         db: [postgres]
 
@@ -26,6 +29,9 @@ jobs:
 
       - name: Test ${{ matrix.db }}
         run: just test ${{ matrix.db }}
+
+      - name: Cleanup ${{ matrix.db }}
+        run: just db-clean ${{ matrix.db }}
 
   publish:
     needs: test
@@ -52,3 +58,6 @@ jobs:
 
       - name: Publish ${{ matrix.db }}
         run: just publish ${{ matrix.db }}
+
+      - name: Cleanup ${{ matrix.db }}
+        run: just clean ${{ matrix.db }}
