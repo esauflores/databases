@@ -18,7 +18,7 @@ _default:
 build db=VARIANT:
   #!/usr/bin/env bash
   PREFIX=${REGISTRY_URL:+${REGISTRY_URL}/}
-  IMAGE="{{db}}:{{VERSION}}"
+  IMAGE="database-{{db}}:{{VERSION}}"
 
   echo "docker build -f {{db}}/Dockerfile -t ${PREFIX}${IMAGE} {{db}}"
   docker build -f {{db}}/Dockerfile -t ${PREFIX}${IMAGE} {{db}}
@@ -27,7 +27,7 @@ build db=VARIANT:
 publish db=VARIANT:
   #!/usr/bin/env bash
   PREFIX=${REGISTRY_URL:+${REGISTRY_URL}/}
-  IMAGE="{{db}}:{{VERSION}}"
+  IMAGE="database-{{db}}:{{VERSION}}"
 
   just build {{db}}
   echo "docker push ${PREFIX}${IMAGE}"
