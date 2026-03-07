@@ -24,7 +24,7 @@ build db=VARIANT:
   docker build -f {{db}}/Dockerfile -t ${PREFIX}${IMAGE} {{db}}
 
 # Build and push image to registry
-publish db=VARIANT:
+push db=VARIANT:
   #!/usr/bin/env bash
   PREFIX=${REGISTRY_URL:+${REGISTRY_URL}/}
   IMAGE="database-{{db}}:{{VERSION}}"
