@@ -37,7 +37,7 @@ publish db=VARIANT:
 
 # Start the database and wait until it's healthy
 db-up db=VARIANT:
-  docker build {{db}}
+  just build {{db}}
   docker compose -f {{db}}/compose.yml up -d --wait
 
 # Stop the database container but preserve data volumes
