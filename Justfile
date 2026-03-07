@@ -36,16 +36,16 @@ publish db=VARIANT:
 ### Tests ###
 
 # Start the database and wait until it's healthy
-db-up db=VARIANT:
+up db=VARIANT:
   just build {{db}}
   docker compose -f {{db}}/compose.yml up -d --wait
 
 # Stop the database container but preserve data volumes
-db-down db=VARIANT:
+down db=VARIANT:
   docker compose -f {{db}}/compose.yml down
 
 # Stop the database container and remove data volumes
-db-clean db=VARIANT:
+clean db=VARIANT:
   docker compose -f {{db}}/compose.yml down -v
 
 
@@ -59,5 +59,5 @@ test db=VARIANT:
 # Run tests against a Postgres database
 _test-postgres:
   #!/usr/bin/env bash
-  just db-up postgres
+  just up postgres
   docker compose -f postgres/compose.yml exec postgres pg_isready -U ${POSTGRES_USER}
