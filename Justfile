@@ -1,53 +1,64 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 set dotenv-load := true
 
-DATABASE      := env("DATABASE", "postgres")
+SERVICE      := env("SERVICE", "postgres")
 VARIANT      := env("VARIANT", "base")
 
 _default:
-  @echo "Default env variables:"
-  @echo "    DATABASE: {{DATABASE}}"
-  @echo "    VARIANT: {{VARIANT}}"
-  @just --list
+  #!/usr/bin/env bash
+  echo "Default env variables:"
+  echo "    SERVICE: {{SERVICE}}"
+  echo "    VARIANT: {{VARIANT}}"
+  just --list
 
 ### Container Management ###
 
-# Start the database and wait until it's healthy
-up db=DATABASE variant=VARIANT:
-  just build {{db}} {{variant}}
-  docker compose -f {{db}}-{{variant}}/compose.yml up -d --wait
+# Start the service and wait until it's healthy
+up service=SERVICE variant=VARIANT:
+  just build {{service}} {{variant}}
+  docker compose -f {{service}}/{{variant}}/compose.yml up -d --wait
 
-# Stop the database container but preserve data volumes
-down db=DATABASE variant=VARIANT:
-  docker compose -f {{db}}-{{variant}}/compose.yml down
+# Stop the service container but preserve data volumes
+down service=SERVICE variant=VARIANT:
+  docker compose -f {{service}}/{{variant}}/compose.yml down
 
 # Remove containers and data volumes but preserve images
-down-volumes db=DATABASE variant=VARIANT:
-  docker compose -f {{db}}-{{variant}}/compose.yml down -v
+down-volumes service=SERVICE variant=VARIANT:
+  docker compose -f {{service}}/{{variant}}/compose.yml down -v
 
 # Remove containers, volumes, and images
-down-all db=DATABASE variant=VARIANT:
-  docker compose -f {{db}}-{{variant}}/compose.yml down -v --rmi local
+down-all service=SERVICE variant=VARIANT:
+  docker compose -f {{service}}/{{variant}}/compose.yml down -v --rmi all
+
+### Shell Access ###
+
+# Access a bash shell inside the running container
+bash service=SERVICE variant=VARIANT:
+  docker compose -f {{service}}/{{variant}}/compose.yml exec {{service}} bash
+
+# Access a sh shell inside the running container
+sh service=SERVICE variant=VARIANT:
+  docker compose -f {{service}}/{{variant}}/compose.yml exec {{service}} sh
 
 ### Build & Publish ###
 
 # Build image locally
-build db=DATABASE variant=VARIANT:
+build service=SERVICE variant=VARIANT:
   #!/usr/bin/env bash
-  IMAGE="db-{{db}}"
+  IMAGE="db-{{service}}"
   VERSION="{{variant}}"
 
-  echo "docker build -f {{db}}-{{variant}}/Dockerfile -t ${IMAGE}:${VERSION} {{db}}-{{variant}}"
-  docker build -f {{db}}-{{variant}}/Dockerfile -t ${IMAGE}:${VERSION} {{db}}-{{variant}}
+  echo "docker build -f {{service}}/{{variant}}/Dockerfile -t ${IMAGE}:${VERSION} {{service}}/{{variant}}"
+  docker build -f {{service}}/{{variant}}/Dockerfile -t ${IMAGE}:${VERSION} {{service}}/{{variant}}
 
 # Build and push image to registry
-push db=DATABASE variant=VARIANT:
+push service=SERVICE variant=VARIANT:
   #!/usr/bin/env bash
   PREFIX=${REGISTRY_URL:+${REGISTRY_URL}/}
-  IMAGE="db-{{db}}"
+  IMAGE="db-{{service}}"
   VERSION="{{variant}}"
 
-  just build {{db}} {{variant}}
+  just build {{service}} {{variant}}
 
   echo "docker tag ${IMAGE}:${VERSION} ${PREFIX}${IMAGE}:${VERSION}"
   docker tag ${IMAGE}:${VERSION} ${PREFIX}${IMAGE}:${VERSION}
@@ -57,16 +68,18 @@ push db=DATABASE variant=VARIANT:
 
 ### Tests ###
 
-# Run tests against a database variant
-test db=DATABASE variant=VARIANT:
+# Run tests against a service
+test service=SERVICE variant=VARIANT:
   #!/usr/bin/env bash
-  just up {{db}} {{variant}}
-  case "{{db}}:{{variant}}" in
+  just up {{service}} {{variant}}
+  trap "just down {{service}} {{variant}}" EXIT
+  case "{{service}}:{{variant}}" in
     postgres:base)  just _test-postgres base ;;
-    *)         echo "Unknown database: {{db}} {{variant}}" >&2; exit 1 ;;
+    *)         echo "Unknown service: {{service}} {{variant}}" >&2; exit 1 ;;
   esac
-  just down {{db}} {{variant}}
 
-# Run tests against a Postgres database
 _test-postgres variant=VARIANT:
-  docker compose -f postgres-{{variant}}/compose.yml exec postgres pg_isready -U ${POSTGRES_USER:-postgres}
+  #!/usr/bin/env bash
+  docker compose -f postgres/{{variant}}/compose.yml exec postgres bash -c "
+    psql -U ${POSTGRES_USER:-postgres} -c 'SELECT 1;'
+  "
