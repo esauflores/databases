@@ -2,9 +2,19 @@
 
 Custom database Docker images for local development and self-hosted deployments.
 
-## Postgres 18
+## Postgres - base
 
-Based on `postgres:18.3-alpine`.
+Based on `postgres:18-alpine`.
+
+### Extensions
+
+The following extensions are enabled by default:
+
+| Extension  | Description                                      |
+| ---------- | ------------------------------------------------ |
+| `citext`   | Case-insensitive text type                       |
+| `pg_trgm`  | Trigram-based text similarity and fuzzy matching |
+| `pgcrypto` | Cryptographic functions                          |
 
 ### Configuration
 ```bash
@@ -20,12 +30,12 @@ cp .env.example .env
 
 ### Usage
 ```bash
-docker pull git.fastwaydata.com/esauflores/database-postgres:latest
+docker pull git.fastwaydata.com/esauflores/db-postgres:base
 ```
 ```yaml
 services:
   postgres:
-    image: git.fastwaydata.com/esauflores/database-postgres:latest
+    image: git.fastwaydata.com/esauflores/db-postgres:base
     env_file: .env
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
