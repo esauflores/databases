@@ -9,56 +9,38 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    strategy:
+    strategy: &db-matrix
       fail-fast: false
       matrix:
-        db: [postgres]
-
-    env:
-      ### Postgres ###
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-      POSTGRES_PORT: 5432
+        include:
+          - db: postgres
+            variant: base
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - uses: jdx/mise-action@v3
 
-      - name: Test ${{ matrix.db }}
-        run: just test ${{ matrix.db }}
+      - name: Test
+        run: just test ${{ matrix.db }} ${{ matrix.variant }}
 
-      - name: Cleanup ${{ matrix.db }}
-        run: just clean ${{ matrix.db }}
+      - name: Cleanup
+        if: always()
+        run: just down-all ${{ matrix.db }} ${{ matrix.variant }}
 
   publish:
     needs: test
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        db: [postgres]
-
-    env:
-      REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
-      VERSION: ${{ github.ref_name }}
+    strategy: *db-matrix
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - uses: jdx/mise-action@v3
 
-      - name: Login to registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY_URL }}
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Push
+        run: just push ${{ matrix.db }} ${{ matrix.variant }}
 
-      - name: Push ${{ matrix.db }}
-        run: just push ${{ matrix.db }} ${{ env.VERSION }}
-
-      - name: Cleanup ${{ matrix.db }}
-        run: |
-          just clean ${{ matrix.db }}
-          just clean-images ${{ matrix.db }}
+      - name: Cleanup
+        if: always()
+        run: just down-all ${{ matrix.db }} ${{ matrix.variant }}
