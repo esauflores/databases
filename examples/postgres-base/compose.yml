@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: git.fastwaydata.com/esauflores/database-postgres:latest
+    image: git.fastwaydata.com/esauflores/db-postgres:base
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
