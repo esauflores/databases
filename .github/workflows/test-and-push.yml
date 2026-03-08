@@ -23,7 +23,7 @@ jobs:
       POSTGRES_PORT: 5432
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: jdx/mise-action@v3
 
       - name: Test
@@ -46,7 +46,7 @@ jobs:
             variant: base
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: jdx/mise-action@v3
 
       - name: Login to registry
