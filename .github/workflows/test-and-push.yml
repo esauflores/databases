@@ -16,12 +16,6 @@ jobs:
           - db: postgres
             variant: base
 
-    env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-      POSTGRES_PORT: 5432
-
     steps:
       - uses: actions/checkout@v6
       - uses: jdx/mise-action@v3
