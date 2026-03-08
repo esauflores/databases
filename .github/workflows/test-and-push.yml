@@ -33,6 +33,7 @@ jobs:
 
   publish:
     needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
 
     strategy:
@@ -55,7 +56,13 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Push ${{ matrix.db }}
-        run: just push ${{ matrix.db }}
+        run: just push ${{ matrix.db }} ${{ env.VERSION }}
+
+      - name: Push latest ${{ matrix.db }}
+        run: just push ${{ matrix.db }} latest
 
       - name: Cleanup ${{ matrix.db }}
         run: just clean ${{ matrix.db }}
+
+      - name: Cleanup images ${{ matrix.db }}
+        run: just clean-images ${{ matrix.db }}

@@ -27,35 +27,34 @@ down db=VARIANT:
 clean db=VARIANT:
   docker compose -f {{db}}/compose.yml down -v
 
+# Remove the database image from local Docker cache
+clean-images db=VARIANT:
+  docker compose -f {{db}}/compose.yml down --rmi local
+
 ### Build & Publish ###
 
 # Build image locally
 build db=VARIANT:
   #!/usr/bin/env bash
-  PREFIX=${REGISTRY_URL:+${REGISTRY_URL}/}
-  IMAGE="database-{{db}}:{{VERSION}}"
-
-  echo "docker build -f {{db}}/Dockerfile -t ${PREFIX}${IMAGE} {{db}}"
-  docker build -f {{db}}/Dockerfile -t ${PREFIX}${IMAGE} {{db}}
+  IMAGE="database-{{db}}:latest"
+  echo "docker build -f {{db}}/Dockerfile -t ${IMAGE} {{db}}"
+  docker build -f {{db}}/Dockerfile -t ${IMAGE} {{db}}
 
 # Build and push image to registry
-push db=VARIANT:
+push db=VARIANT version=VERSION:
   #!/usr/bin/env bash
+  REGISTRY_URL='{{REGISTRY_URL}}'
   PREFIX=${REGISTRY_URL:+${REGISTRY_URL}/}
-  IMAGE="database-{{db}}:{{VERSION}}"
+  IMAGE="database-{{db}}"
+  VERSION={{version}}
 
   just build {{db}}
-  echo "docker push ${PREFIX}${IMAGE}"
-  docker push ${PREFIX}${IMAGE}
 
-push-latest db=VARIANT:
-  #!/usr/bin/env bash
-  PREFIX=${REGISTRY_URL:+${REGISTRY_URL}/}
-  IMAGE="database-{{db}}:latest"
+  echo "docker tag ${IMAGE}:latest ${PREFIX}${IMAGE}:${VERSION}"
+  docker tag ${IMAGE}:latest ${PREFIX}${IMAGE}:${VERSION}
 
-  just build {{db}}
-  echo "docker push ${PREFIX}${IMAGE}"
-  docker push ${PREFIX}${IMAGE}
+  echo "docker push ${PREFIX}${IMAGE}:${VERSION}"
+  docker push ${PREFIX}${IMAGE}:${VERSION}
 
 ### Tests ###
 
@@ -70,4 +69,4 @@ test db=VARIANT:
 _test-postgres:
   #!/usr/bin/env bash
   just up postgres
-  docker compose -f postgres/compose.yml exec postgres pg_isready -U ${POSTGRES_USER}
+  docker compose -f postgres/compose.yml exec postgres pg_isready -U ${POSTGRES_USER:-postgres}
