@@ -43,7 +43,7 @@ build db=DATABASE variant=VARIANT:
 # Build and push image to registry
 push db=DATABASE variant=VARIANT:
   #!/usr/bin/env bash
-  PREFIX="${REGISTRY_URL:+${REGISTRY_URL}/}"
+  PREFIX=${REGISTRY_URL:+${REGISTRY_URL}/}
   IMAGE="db-{{db}}"
   VERSION="{{variant}}"
 
