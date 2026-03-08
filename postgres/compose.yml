@@ -1,7 +1,7 @@
 services:
   postgres:
     # run `just build postgres` first
-    image: database-postgres:latest
+    image: db-postgres:latest
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -10,12 +10,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - postgres-data:/var/lib/postgresql
 
 volumes:
-  postgres_data:
+  postgres-data:

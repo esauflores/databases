@@ -36,7 +36,7 @@ clean-images db=VARIANT:
 # Build image locally
 build db=VARIANT:
   #!/usr/bin/env bash
-  IMAGE="database-{{db}}:latest"
+  IMAGE="db-{{db}}:latest"
   echo "docker build -f {{db}}/Dockerfile -t ${IMAGE} {{db}}"
   docker build -f {{db}}/Dockerfile -t ${IMAGE} {{db}}
 
@@ -45,7 +45,7 @@ push db=VARIANT version=VERSION:
   #!/usr/bin/env bash
   REGISTRY_URL='{{REGISTRY_URL}}'
   PREFIX=${REGISTRY_URL:+${REGISTRY_URL}/}
-  IMAGE="database-{{db}}"
+  IMAGE="db-{{db}}"
   VERSION={{version}}
 
   just build {{db}}
