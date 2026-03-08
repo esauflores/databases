@@ -1,7 +1,7 @@
 services:
   postgres:
     # run `just build postgres` first
-    image: db-postgres:latest
+    image: db-postgres:base
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
