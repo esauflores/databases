@@ -1,4 +1,4 @@
-name: Database Test
+name: Test and Push To Registry
 
 on:
   pull_request:
