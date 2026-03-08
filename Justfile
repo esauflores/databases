@@ -48,7 +48,6 @@ down db=VARIANT:
 clean db=VARIANT:
   docker compose -f {{db}}/compose.yml down -v
 
-
 # Run tests against a database variant
 test db=VARIANT:
   @case "{{db}}" in \
