@@ -1,6 +1,6 @@
 services:
   postgres:
-    # run `just build postgres` first
+    # run `just build postgres base` first
     image: db-postgres:base
     restart: unless-stopped
     environment:
@@ -10,7 +10,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - postgres-base-data:/var/lib/postgresql
+      - postgres-data:/var/lib/postgresql
 
 volumes:
-  postgres-base-data:
+  postgres-data:
