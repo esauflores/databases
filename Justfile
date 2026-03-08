@@ -12,6 +12,21 @@ _default:
   @echo "    VERSION: {{VERSION}}"
   @just --list
 
+### Container Management ###
+
+# Start the database and wait until it's healthy
+up db=VARIANT:
+  just build {{db}}
+  docker compose -f {{db}}/compose.yml up -d --wait
+
+# Stop the database container but preserve data volumes
+down db=VARIANT:
+  docker compose -f {{db}}/compose.yml down
+
+# Stop the database container and remove data volumes
+clean db=VARIANT:
+  docker compose -f {{db}}/compose.yml down -v
+
 ### Build & Publish ###
 
 # Build image locally
@@ -34,19 +49,6 @@ push db=VARIANT:
   docker push ${PREFIX}${IMAGE}
 
 ### Tests ###
-
-# Start the database and wait until it's healthy
-up db=VARIANT:
-  just build {{db}}
-  docker compose -f {{db}}/compose.yml up -d --wait
-
-# Stop the database container but preserve data volumes
-down db=VARIANT:
-  docker compose -f {{db}}/compose.yml down
-
-# Stop the database container and remove data volumes
-clean db=VARIANT:
-  docker compose -f {{db}}/compose.yml down -v
 
 # Run tests against a database variant
 test db=VARIANT:
