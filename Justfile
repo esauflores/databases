@@ -63,7 +63,7 @@ test db=DATABASE variant=VARIANT:
   just up {{db}} {{variant}}
   case "{{db}}:{{variant}}" in
     postgres:base)  just _test-postgres base ;;
-    *)         echo "Unknown database: {{db}}" >&2; exit 1 ;;
+    *)         echo "Unknown database: {{db}} {{variant}}" >&2; exit 1 ;;
   esac
   just down {{db}} {{variant}}
 
