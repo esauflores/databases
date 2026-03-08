@@ -48,6 +48,15 @@ push db=VARIANT:
   echo "docker push ${PREFIX}${IMAGE}"
   docker push ${PREFIX}${IMAGE}
 
+push-latest db=VARIANT:
+  #!/usr/bin/env bash
+  PREFIX=${REGISTRY_URL:+${REGISTRY_URL}/}
+  IMAGE="database-{{db}}:latest"
+
+  just build {{db}}
+  echo "docker push ${PREFIX}${IMAGE}"
+  docker push ${PREFIX}${IMAGE}
+
 ### Tests ###
 
 # Run tests against a database variant
