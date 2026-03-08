@@ -58,11 +58,7 @@ jobs:
       - name: Push ${{ matrix.db }}
         run: just push ${{ matrix.db }} ${{ env.VERSION }}
 
-      - name: Push latest ${{ matrix.db }}
-        run: just push ${{ matrix.db }} latest
-
       - name: Cleanup ${{ matrix.db }}
-        run: just clean ${{ matrix.db }}
-
-      - name: Cleanup images ${{ matrix.db }}
-        run: just clean-images ${{ matrix.db }}
+        run: |
+          just clean ${{ matrix.db }}
+          just clean-images ${{ matrix.db }}
